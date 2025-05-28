@@ -1,0 +1,33 @@
+{
+  "name": "assignment",
+  "version": "1.0.0",
+  "type": "module",
+  "main": "src/server.ts",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/server.js"
+  },
+  "author": "Rehan",
+  "license": "MIT",
+  "dependencies": {
+    "@apollo/server": "^4.12.1",
+    "bcrypt": "^6.0.0",
+    "cookie": "^1.0.2",
+    "cors": "^2.8.5",
+    "express": "4",
+    "graphql": "^16.11.0",
+    "graphql-tag": "^2.12.6",
+    "jsonwebtoken": "^9.0.2",
+    "morgan": "^1.10.0"
+  },
+  "devDependencies": {
+    "@types/bcrypt": "^5.0.2",
+    "@types/cors": "^2.8.18",
+    "@types/express": "4",
+    "@types/jsonwebtoken": "^9.0.9",
+    "@types/morgan": "^1.9.4",
+    "@types/node": "^22.15.24",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.5.4"
+  }
+}
