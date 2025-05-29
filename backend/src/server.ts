@@ -2,13 +2,15 @@ import cors from "cors";
 import cookie from "cookie";
 import morgan from "morgan";
 import express from "express";
+
 import { ApolloServer } from "@apollo/server";
+import { expressMiddleware } from "@apollo/server/express4";
+
 import { verifyToken } from "./utils/token.js";
+import { fetchProductsData } from "./utils/getData.js";
 import { authTypeDefs } from "./graphql/typeDefs/auth.js";
 import { authResolvers } from "./graphql/resolvers/auth.js";
-import { expressMiddleware } from "@apollo/server/express4";
 import type { Application, Request, Response } from "express";
-import { fetchProductsData } from "./utils/getData.js";
 import { productTypeDefs } from "./graphql/typeDefs/product.js";
 import { productResolvers } from "./graphql/resolvers/product.js";
 
@@ -24,13 +26,17 @@ async function main() {
     const app: Application = express()
 
     // Middleware
-    app.use(cors())
+    app.use(cors({
+        origin: 'http://localhost:5173',
+        credentials: true,
+    }));
     app.use(morgan('dev'))
     app.use(express.json())
 
     const server = new ApolloServer({
         typeDefs: [authTypeDefs, productTypeDefs],
         resolvers: [authResolvers, productResolvers],
+        introspection: true,
     })
 
     await server.start()
@@ -65,8 +71,8 @@ async function main() {
 
     await fetchProductsData()
 
-    app.listen(3000, () => {
-        console.log('Server is running on port 3000')
+    app.listen(4000, () => {
+        console.log('Server is running on port 4000')
     })
 }
 

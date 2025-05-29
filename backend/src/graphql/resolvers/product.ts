@@ -22,8 +22,7 @@ export const productResolvers = {
                     const lowerSearch = search.toLowerCase();
                     filteredProducts = filteredProducts.filter(
                         (product) =>
-                            product.title.toLowerCase().includes(lowerSearch) ||
-                            product.description.toLowerCase().includes(lowerSearch)
+                            product.title.toLowerCase().includes(lowerSearch)
                     );
                 }
 

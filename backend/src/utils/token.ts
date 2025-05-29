@@ -13,5 +13,5 @@ export function verifyToken(token: string) {
 
     const decoded = jwt.verify(token, JWT_SECRET!);
 
-    return decoded as { email: string };
+    return decoded as { email: string, username: string };
 }
