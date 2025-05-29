@@ -1,25 +1,13 @@
-import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import Input from '../components/Input';
 import Button from '../components/Button';
+import { useEffect, useState } from 'react';
+import { useMutation } from '@apollo/client';
 import { addToken, getToken } from '../utils/token';
-import { gql, useMutation } from '@apollo/client';
+import { SIGNIN_MUTATION } from '../queries/signin';
 import { Link, useNavigate } from 'react-router-dom';
 import { Mail, Lock, ArrowRight, Loader2 } from 'lucide-react';
 
-
-const SIGNIN_MUTATION = gql`
-  mutation Signin($email: String!, $password: String!) {
-  signin(email: $email, password: $password) {
-    data {
-      email
-      username
-    },
-    token
-  }
-}
-
-`;
 
 const SignIn = () => {
 

@@ -3,20 +3,11 @@ import Input from '../components/Input';
 import { getToken } from '../utils/token';
 import Button from '../components/Button';
 import { useEffect, useState } from 'react';
-import { gql, useMutation } from '@apollo/client';
+import { useMutation } from '@apollo/client';
+import { SIGNUP_MUTATION } from '../queries/signup';
 import { Link, useNavigate } from 'react-router-dom';
 import { Mail, Lock, User, ArrowRight, Loader2 } from 'lucide-react';
 
-const SIGNUP_MUTATION = gql`
-  mutation Signup($email: String!, $password: String!, $username: String!) {
-    signup(email: $email, password: $password, username: $username) {
-      data {
-        email
-        username
-      }
-    }
-  }
-`;
 
 const SignUp = () => {
 
