@@ -1,19 +1,12 @@
+import { Search } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { Bell, Search } from 'lucide-react';
-import { useEffect, useState, useMemo } from 'react';
-import { getToken, getUsernameFromToken } from '../utils/token';
+import { useQuery } from '@apollo/client';
 import { useNavigate } from 'react-router-dom';
+import { useEffect, useState, useMemo } from 'react';
+import { GET_PRODUCTS } from '../queries/getProducts';
+import { getToken, getUsernameFromToken } from '../utils/token';
 
-const mockProducts = [
-  { id: 1, title: 'iPhone 13', description: 'Latest Apple smartphone', price: 999, brand: 'Apple', category: 'Electronics' },
-  { id: 2, title: 'Galaxy S21', description: 'Samsung flagship phone', price: 799, brand: 'Samsung', category: 'Electronics' },
-  { id: 3, title: 'Nike Air Max', description: 'Comfortable running shoes', price: 120, brand: 'Nike', category: 'Footwear' },
-  { id: 4, title: 'Levi\'s Jeans', description: 'Classic denim jeans', price: 60, brand: 'Levi\'s', category: 'Clothing' },
-  { id: 5, title: 'Sony WH-1000XM4', description: 'Noise cancelling headphones', price: 350, brand: 'Sony', category: 'Electronics' },
-  { id: 6, title: 'Adidas Ultraboost', description: 'High-performance running shoes', price: 180, brand: 'Adidas', category: 'Footwear' },
-];
-
-const categories = ['All', 'Electronics', 'Footwear', 'Clothing'];
+const categories = ['All', 'Electronics', 'Gaming', 'Smartphones', 'Fitness'];
 
 const Dashboard = () => {
 
@@ -24,6 +17,17 @@ const Dashboard = () => {
   const [username, setUsername] = useState<string | null>(null);
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [sortPrice, setSortPrice] = useState<'asc' | 'desc' | null>(null);
+
+  const { loading, data } = useQuery(GET_PRODUCTS, {
+    variables: {
+      filter: {
+        category: selectedCategory === 'All' ? "" : selectedCategory,
+        search: searchTerm,
+        sortBy: sortPrice ? "price" : "",
+        sortOrder: sortPrice ?? ""
+      }
+    }
+  });
 
   useEffect(() => {
     const hours = new Date().getHours();
@@ -39,8 +43,8 @@ const Dashboard = () => {
 
     const token = getToken();
 
-    if(!token) {
-        navigate("/signin")
+    if (!token) {
+      navigate("/signin")
     }
 
     const usernameFromToken = getUsernameFromToken();
@@ -50,29 +54,46 @@ const Dashboard = () => {
     setGreeting(greetingText);
   }, []);
 
-  // Filter + sort products based on search, category and price sort
   const filteredProducts = useMemo(() => {
-    let products = [...mockProducts];
+    if (!data?.getProducts?.data) return [];
 
-    // Filter by category
+    let products = [...data.getProducts.data];
+
     if (selectedCategory !== 'All') {
       products = products.filter(p => p.category === selectedCategory);
     }
 
-    // Filter by search title
     if (searchTerm.trim() !== '') {
       products = products.filter(p =>
         p.title.toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
 
-    // Sort by price
     if (sortPrice) {
       products.sort((a, b) => sortPrice === 'asc' ? a.price - b.price : b.price - a.price);
     }
 
     return products;
-  }, [searchTerm, selectedCategory, sortPrice]);
+  }, [data, searchTerm, selectedCategory, sortPrice]);
+
+  // if (loading) {
+  //   return (
+  //     <div className="p-6">
+  //       <div className="animate-pulse space-y-4">
+  //         {[...Array(5)].map((_, i) => (
+  //           <div key={i} className="grid grid-cols-6 gap-4 p-4 border rounded shadow-sm bg-white">
+  //             <div className="h-4 bg-gray-300 rounded col-span-1"></div>
+  //             <div className="h-4 bg-gray-300 rounded col-span-1"></div>
+  //             <div className="h-4 bg-gray-300 rounded col-span-1"></div>
+  //             <div className="h-4 bg-gray-300 rounded col-span-1"></div>
+  //             <div className="h-4 bg-gray-300 rounded col-span-1"></div>
+  //             <div className="h-4 bg-gray-300 rounded col-span-1"></div>
+  //           </div>
+  //         ))}
+  //       </div>
+  //     </div>
+  //   );
+  // }
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
@@ -91,28 +112,21 @@ const Dashboard = () => {
           transition={{ duration: 0.5 }}
           className="mt-4 md:mt-0 flex items-center space-x-3"
         >
-          <div className="relative">
-            <Bell size={20} className="text-gray-500 cursor-pointer hover:text-gray-700 transition-colors" />
-            <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center">
-              3
-            </span>
-          </div>
-
           <div className="relative flex-1 md:w-64">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <Search size={16} className="text-gray-400" />
+              <Search size={16} className="text-black" />
             </div>
             <input
               type="text"
               placeholder="Search by title..."
-              className="border border-gray-300 rounded-md px-3 py-1.5 pl-9 pr-3 h-9 text-sm w-full focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="border border-gray-300 text-black placeholder:text-black rounded-md px-3 py-1.5 pl-9 pr-3 h-9 text-sm w-full focus:outline-none"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
 
           <select
-            className="border border-gray-300 rounded-md px-3 py-1.5 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             value={selectedCategory}
             onChange={(e) => setSelectedCategory(e.target.value)}
           >
@@ -122,7 +136,7 @@ const Dashboard = () => {
           </select>
 
           <select
-            className="border border-gray-300 rounded-md px-3 py-1.5 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             value={sortPrice ?? ''}
             onChange={(e) => {
               const val = e.target.value;
@@ -148,16 +162,16 @@ const Dashboard = () => {
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Title</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Description</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Price ($)</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Brand</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Category</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-black uppercase tracking-wider">ID</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-black uppercase tracking-wider">Title</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-black uppercase tracking-wider">Description</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-black uppercase tracking-wider">Price</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-black uppercase tracking-wider">Brand</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-black uppercase tracking-wider">Category</th>
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {filteredProducts.length === 0 ? (
+              {!data?.getProducts?.data || data.getProducts.data.length === 0 ? (
                 <tr>
                   <td colSpan={6} className="text-center py-8 text-gray-500">
                     No products found.
@@ -166,12 +180,14 @@ const Dashboard = () => {
               ) : (
                 filteredProducts.map(product => (
                   <tr key={product.id} className="hover:bg-gray-50 transition-colors">
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{product.id}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{product.title}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                      {product.id.slice(0, 8)}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{product.title}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{product.description}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${product.price}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{product.brand}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{product.category}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{product.brand}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{product.category}</td>
                   </tr>
                 ))
               )}
